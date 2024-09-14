@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "zoning"
+version = "0.1.0"
+description = ""
+authors = ["Alex Shadley <shadleyalex@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+jupyter = "^1.0.0"
+pandas = "^2.2.2"
+geopandas = "^1.0.1"
+matplotlib = "^3.9.1"
+branca = "^0.7.2"
+folium = "^0.17.0"
+mapclassify = "^2.8.0"
+shapely = "^2.0.5"
+pyarrow = "^17.0.0"
+sqlalchemy = "^2.0.32"
+psycopg2-binary = "^2.9.9"
+geoalchemy2 = "^0.15.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
