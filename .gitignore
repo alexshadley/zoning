@@ -1,3 +1,8 @@
 .ipynb_checkpoints
 .DS_Store
 data/
+.gitignore
+frontend/node_modules/
+frontend/.next
+frontend/data
+.env

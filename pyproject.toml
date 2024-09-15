@@ -19,6 +19,8 @@ pyarrow = "^17.0.0"
 sqlalchemy = "^2.0.32"
 psycopg2-binary = "^2.9.9"
 geoalchemy2 = "^0.15.2"
+python-dotenv = "^1.0.1"
+pyrosm = "^0.6.2"
 
 
 [build-system]
