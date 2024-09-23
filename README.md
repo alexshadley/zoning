@@ -1,4 +1,4 @@
-legalize
+lgalize
 
 Execute 
 
@@ -7,3 +7,7 @@ poetry install
 poetry shell
 ```
 in unix.
+
+```bash
+mkdir ./frontend/data/
+```
