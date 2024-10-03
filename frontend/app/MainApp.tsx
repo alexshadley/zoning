@@ -1,5 +1,7 @@
 "use client";
 import { useState } from "react";
+import { useEffect } from "react";
+
 import { ParcelMap } from "./ParcelMap";
 import _, { set } from "lodash";
 import next from "next";
@@ -13,11 +15,26 @@ export const MainApp = ({ parcels }: { parcels: any }) => {
   const [distance, setDistance] = useState("10");
   const [heightMultiple, setHeightMultiple] = useState("1.3");
   const [errorMessage, setErrorMessage] = useState<null | string>(null);
-
+  const [nominalCapacity, setNominalCapacity] = useState(0);
   const [rezoneInProgress, setRezoneInProgress] = useState(false);
   const [rezonedParcels, setRezonedParcels] = useState<null | {
     [blklot: string]: RezonedParcel;
   }>(null);
+
+  useEffect(() => {
+    if (rezonedParcels) {
+      const capacity = Object.values(rezonedParcels).reduce((total, parcel) => {
+        const addedCapacity = Number(parcel.added_capacity) || 0;
+        console.log(`Parcel ${parcel.blklot} Added Capacity:`, addedCapacity);
+        return total + addedCapacity;
+      }, 0);
+
+      setNominalCapacity(Math.round(capacity));
+    } else {
+      setNominalCapacity(0);
+    }
+  }, [rezonedParcels]);
+
 
   const handleRezone = async () => {
     const distanceNum = parseFloat(distance);
@@ -64,7 +81,11 @@ export const MainApp = ({ parcels }: { parcels: any }) => {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
     setRezoneInProgress(false);
+
+
   };
+
+
 
   return (
     <div style={{ width: "90%", height: "90%" }}>
@@ -110,6 +131,9 @@ export const MainApp = ({ parcels }: { parcels: any }) => {
               ></div>
             </div>
           )}
+          <div>
+             <p>Nominal capacity: {nominalCapacity}</p>
+             </div>
         </div>
         <ParcelMap parcels={parcels} rezonedParcels={rezonedParcels} />
       </div>

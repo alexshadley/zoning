@@ -17,6 +17,7 @@ type ParcelData = {
   blklot: string;
   height: number;
   zoned_height: number;
+  added_capacity?: number;
   nearbyHeight?: number;
   newZonedHeight?: number;
 };
@@ -77,6 +78,7 @@ export const ParcelMap = memo(
               ...parcel.properties,
               nearbyHeight: rezonedParcel.nearby_height,
               newZonedHeight: rezonedParcel.new_zoned_height,
+              added_capacity: rezonedParcel.added_capacity,
             },
           };
         }
@@ -117,6 +119,7 @@ export const ParcelMap = memo(
         if (info.object.properties.newZonedHeight) {
           text += `\ntallest built nearby: ${info.object.properties.nearbyHeight}ft`;
           text += `\nnew zoning height: ${info.object.properties.newZonedHeight}ft`;
+          text += `\nnew zoning capacity: ${Math.round(info.object.properties.added_capacity || 0)}`;
           text += `\nzoning height increase: ${storiesFromHeight(
             info.object.properties.newZonedHeight -
               info.object.properties.zoned_height
