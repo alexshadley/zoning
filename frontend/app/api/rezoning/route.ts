@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
       SELECT
         p.blklot,
         p.height,
+        p.gen_hght,
         ST_Area(ST_Transform(p.geometry, 2227)) AS area_sq_ft,
         p.geometry
       FROM
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
     nearby_heights AS (
       SELECT
         p.blklot,
-        MAX(p.height) as height,
+        GREATEST(MAX(p.height), MAX(p.gen_hght)) as height, -- use greater of existing height and existing zoning to determine squo capacity
         MAX(p.area_sq_ft) as area_sq_ft,
         MAX(nearby.height) AS nearby_height,
         MAX(nearby.height) * $2 AS new_zoned_height
@@ -93,7 +94,11 @@ export async function GET(request: NextRequest) {
   select blklot,
          nearby_height, 
          new_zoned_height, 
-         CASE WHEN new_capacity < squo_capacity THEN 0 ELSE ROUND(new_capacity - squo_capacity) END as added_capacity
+         CASE WHEN new_capacity < squo_capacity
+          THEN 0
+          ELSE
+          LEAST(ROUND(new_capacity - squo_capacity), 1000)
+         END as added_capacity
   FROM capacity_calculations
   ;
   `,
@@ -106,7 +111,5 @@ export async function GET(request: NextRequest) {
   );
 
   client.end();
-  console.log("API Response Rows:", rows);
-
   return NextResponse.json({ rezonedParcels: rows }, { status: 200 });
 }
