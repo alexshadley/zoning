@@ -15,8 +15,9 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const limit = searchParams.get("limit") ?? 1000000;
-  const offset = searchParams.get("offset") ?? 0;
+  // const limit = searchParams.get("limit") ?? 1000000;
+  // const offset = searchParams.get("offset") ?? 0;
+  // const nhood = searchParams.get("nhood") ?? "South of Market";
 
   const { rows } = await client.query(
     `
@@ -28,14 +29,10 @@ export async function GET(request: NextRequest) {
         p.gen_hght,
         ST_Area(ST_Transform(p.geometry, 2227)) AS area_sq_ft,
         p.geometry
-      FROM
-        (
-          SELECT *
-          FROM prc_hgt_bldg
-          ORDER BY blklot
-          LIMIT $3
-          OFFSET $4
-        ) AS p
+      FROM prc_hgt_bldg as p
+      JOIN nhoods as n
+      ON ST_Contains(n.geometry, p.geometry)
+      WHERE n.nhood = $3
     ),
     nearby_heights AS (
       SELECT
@@ -105,8 +102,7 @@ export async function GET(request: NextRequest) {
     [
       searchParams.get("distance"),
       searchParams.get("heightMultiple"),
-      limit,
-      offset,
+      searchParams.get("nhood"),
     ]
   );
 

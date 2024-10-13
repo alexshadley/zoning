@@ -38,10 +38,16 @@ type Parcel = Feature<Geometry, ParcelData>;
 export const ParcelMap = memo(
   ({
     parcels,
+    nhoodGeoms,
     rezonedParcels,
+    is3D,
+    showNhoodOverlay,
   }: {
     parcels: any;
+    nhoodGeoms: any;
     rezonedParcels: { [blklot: string]: RezonedParcel } | null;
+    is3D: boolean;
+    showNhoodOverlay: boolean;
   }) => {
     const tileLayer = new TileLayer({
       id: "TileLayer",
@@ -67,6 +73,19 @@ export const ParcelMap = memo(
       pickable: false,
     });
 
+    const nhoodLayer = new GeoJsonLayer({
+      id: "NhoodLayer",
+      data: nhoodGeoms["features"].map((nhood: any) => ({
+        ...nhood,
+        properties: { name: nhood.properties.nhood },
+      })),
+      filled: false,
+      // lineWidthUnits: "pixels",
+      getLineWidth: 5,
+      getLineColor: [44, 175, 254, 200],
+      lineWidthMinPixels: 3,
+    });
+
     let data: Parcel[];
     if (rezonedParcels) {
       data = parcels["features"].map((parcel: Parcel): Parcel => {
@@ -87,7 +106,7 @@ export const ParcelMap = memo(
     } else {
       data = parcels["features"];
     }
-    console.log("data going in", data[0]);
+    data = data.filter((parcel) => parcel.properties.nearbyHeight);
 
     const parcelLayer = new GeoJsonLayer<ParcelData>({
       id: "ParcelLayer",
@@ -102,7 +121,7 @@ export const ParcelMap = memo(
         }
         return [150, 150, 150, 200];
       },
-      extruded: true,
+      extruded: is3D,
       wireframe: true,
       getElevation: (f: Parcel) => f.properties.height,
       getText: (f: Parcel) =>
@@ -119,7 +138,9 @@ export const ParcelMap = memo(
         if (info.object.properties.newZonedHeight) {
           text += `\ntallest built nearby: ${info.object.properties.nearbyHeight}ft`;
           text += `\nnew zoning height: ${info.object.properties.newZonedHeight}ft`;
-          text += `\nnew zoning capacity: ${Math.round(info.object.properties.added_capacity || 0)}`;
+          text += `\nnew zoning capacity: ${Math.round(
+            info.object.properties.added_capacity || 0
+          )}`;
           text += `\nzoning height increase: ${storiesFromHeight(
             info.object.properties.newZonedHeight -
               info.object.properties.zoned_height
@@ -128,6 +149,14 @@ export const ParcelMap = memo(
       }
       return text;
     }, []);
+
+    const layers = useMemo(() => {
+      const ls = [tileLayer, parcelLayer];
+      if (showNhoodOverlay) {
+        ls.push(nhoodLayer);
+      }
+      return ls;
+    }, [tileLayer, parcelLayer, nhoodLayer, showNhoodOverlay]);
 
     return (
       <div className="relative flex-1">
@@ -138,7 +167,7 @@ export const ParcelMap = memo(
             zoom: 11,
           }}
           controller
-          layers={[tileLayer, parcelLayer]}
+          layers={layers}
           getTooltip={getTooltip}
         />
       </div>
