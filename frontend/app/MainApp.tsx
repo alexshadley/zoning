@@ -78,23 +78,6 @@ export const MainApp = ({
   const [is3D, setIs3D] = useState(false);
   const [showNhoodOverlay, setShowNhoodOverlay] = useState(false);
 
-  // useEffect(() => {
-  //   if (rezonedParcels) {
-  //     const capacity = Object.values(rezonedParcels).reduce((total, parcel) => {
-  //       const addedCapacity = Number(parcel.added_capacity) || 0;
-  //       return total + addedCapacity;
-  //     }, 0);
-
-  //     setNominalCapacity(Math.round(capacity));
-  //   } else {
-  //     setNominalCapacity(0);
-  //   }
-  // }, [rezonedParcels]);
-
-  // const addCapacitiesFromParcels = (parcels: any) => {
-
-  // }
-
   const handleRezone = async () => {
     const distanceNum = parseFloat(distance);
     if (isNaN(distanceNum)) {
@@ -112,6 +95,8 @@ export const MainApp = ({
 
     setRezoneInProgress(true);
     setRezonedParcels({});
+    setNominalCapacity(0);
+    setCapacityByNhood({});
     while (nhoodsToFetch.length > 0 || inflightCount > 0) {
       if (inflightCount < MAX_INFLIGHT && nhoodsToFetch.length > 0) {
         const nextNhood = nhoodsToFetch.pop()!;
@@ -147,7 +132,7 @@ export const MainApp = ({
   return (
     <div style={{ width: "90%", height: "90%" }}>
       <div className="flex h-full gap-8">
-        <div className="flex flex-col gap-8 basis-1/4">
+        <div className="flex flex-col gap-8 basis-1/5">
           <div className="flex flex-col gap-4 border rounded p-4 shadow">
             <p className="text-lg">Zoning settings</p>
             <div>
@@ -214,6 +199,8 @@ export const MainApp = ({
               <p>Neighborhood overlay</p>
             </div>
           </div>
+        </div>
+        <div className="basis-1/5">
           <NhoodChart capacityByNhood={capacityByNhood} />
         </div>
         <ParcelMap

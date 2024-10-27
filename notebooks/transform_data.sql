@@ -39,101 +39,17 @@ create index idx_osm_buildings_height_geometry on osm_buildings_height using gis
 -- now join in osm buildings
 drop table if exists prc_hgt_bldg;
 create table prc_hgt_bldg as
-select
-p.blklot,
-(array_agg(p.geometry))[1] as geometry,
-(array_agg(p.gen_hght))[1] as gen_hght,
-max(b.height) as height
+select distinct on (p.blklot)
+	p.blklot,
+	p.geometry,
+	p.gen_hght,
+	b.height
 from prc_hgt as p
 left join osm_buildings_height as b
-on ST_Intersects(p.geometry, b.geometry)
-group by p.blklot;
+	on ST_Intersects(p.geometry, b.geometry)
+order by
+	p.blklot asc,
+	st_distance(st_centroid(p.geometry), st_centroid(b.geometry)) asc;
 create index idx_prc_hgt_bldg_geometry on prc_hgt_bldg using gist(geometry);
 create index idx_prc_hgt_bldg_blklot on prc_hgt_bldg (blklot);
 
-
--- app queries
---------------
-
-
-
--- select
---   p.blklot,
---   max(nearby.height) as nearby_height
--- from 
--- 	(
--- 		select * from prc_hgt_bldg
--- 		order by blklot
--- 		limit 1000
--- 		offset 160000
--- 	) as p
--- join prc_hgt_bldg as nearby
--- on ST_DWithin(p.geometry, nearby.geometry, 10)
--- and p.blklot != nearby.blklot
--- group by p.blklot;
-
--- -------
-
--- select * from prc_hgt_bldg limit 10;
-
-
--- select height is null, count(*) from prc_hgt_bldg group by height is null;
-
-
--- select * from prc_hgt_assessor limit 10;
-
-
-
--- select * from parcel as p
--- join parcel as p2
--- on ST_Intersects(p.geometry, p2.geometry) and p.blklot != p2.blklot;
-
-
--- ---------------
--- -- PRC cleaning
-
--- -- goal: 121 km2
-
-
-
-
-
-
--- select
--- count(*) as "prc count",
--- sum(ST_area(geometry)) / (1000 * 1000) as "total area (km2)"
--- from prc_dedupe;
-
-
-
--- select * from prc where blklot='0311015';
-
--- select * from prc
--- join (
--- select * from prc where blklot = '0311015'
--- ) as my_office
--- on ST_DWithin(prc.geometry, my_office.geometry, 0);
-
--- -----------------------
--- -- neighborhing parcel built heights
-
--- create index idx_prc_hgt_assessor_geometry on prc_hgt_assessor using gist(geometry);
-
--- drop table prc_hgt_assessor_neighbor;
--- create table prc_hgt_assessor_neighbor as
--- select
---   p.blklot,
---   any_value(p.geometry) as geometry,
---   any_value(p.gen_hght) as gen_hght,
---   any_value(p.stories) as stories,
---   max(nearby.stories) as neighbor_stories
--- from prc_hgt_assessor as p
--- join prc_hgt_assessor as nearby
--- on ST_DWithin(p.geometry, nearby.geometry, 10)
--- and p.blklot != nearby.blklot
--- group by p.blklot;
-
-
-
-
--- select * from pg_indexes;

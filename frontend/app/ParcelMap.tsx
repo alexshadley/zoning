@@ -22,15 +22,19 @@ type ParcelData = {
   newZonedHeight?: number;
 };
 
-const COLOR_SCALE = chroma.scale(["lightgray", "lightgreen"]);
+const COLOR_SCALE = chroma.scale(["#3beb6a", "#3bb3eb"]);
 
 const storiesFromHeight = (height: number) => {
   return Math.floor(height / 10);
 };
 
-const getColorForStories = (stories: number) => {
-  const clamped = Math.min(10, Math.max(0, stories));
-  return COLOR_SCALE(clamped / 10).rgb();
+const getColorForCapacityAdded = (unitsAdded: number) => {
+  if (unitsAdded < 1) {
+    return chroma("lightgray").rgb();
+  }
+
+  const clamped = Math.min(50, Math.max(0, unitsAdded));
+  return COLOR_SCALE(clamped / 50).rgb();
 };
 
 type Parcel = Feature<Geometry, ParcelData>;
@@ -82,8 +86,8 @@ export const ParcelMap = memo(
       filled: false,
       // lineWidthUnits: "pixels",
       getLineWidth: 5,
-      getLineColor: [44, 175, 254, 200],
-      lineWidthMinPixels: 3,
+      getLineColor: [247, 121, 218, 200],
+      lineWidthMinPixels: 5,
     });
 
     let data: Parcel[];
@@ -117,13 +121,17 @@ export const ParcelMap = memo(
           const storiesIncrease = storiesFromHeight(
             f.properties.newZonedHeight - f.properties.zoned_height
           );
-          return [...getColorForStories(storiesIncrease), 200];
+          return [
+            ...getColorForCapacityAdded(f.properties.added_capacity ?? 0),
+            200,
+          ];
         }
         return [150, 150, 150, 200];
       },
       extruded: is3D,
       wireframe: true,
-      getElevation: (f: Parcel) => f.properties.height,
+      // height is in feet, convert to meters
+      getElevation: (f: Parcel) => f.properties.height / 3.28084,
       getText: (f: Parcel) =>
         `zoned: ${f.properties.zoned_height}; actual: ${f.properties.height}`,
       pickable: true,
@@ -146,6 +154,8 @@ export const ParcelMap = memo(
               info.object.properties.zoned_height
           )} stories`;
         }
+
+        text += `\n\nblklot: ${info.object.properties.blklot}`;
       }
       return text;
     }, []);
