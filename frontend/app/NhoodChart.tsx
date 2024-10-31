@@ -9,14 +9,13 @@ export const NhoodChart = ({
 }: {
   capacityByNhood: Record<string, number>;
 }) => {
-  const [showAll, setShowAll] = useState(true);
   if (Object.keys(capacityByNhood).length === 0) {
     return null;
   }
 
-  const sortedCapacityByNhood = Object.entries(capacityByNhood)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, showAll ? undefined : 20);
+  const sortedCapacityByNhood = Object.entries(capacityByNhood).sort(
+    ([, a], [, b]) => b - a
+  );
 
   // bar chart
   const options: HighchartsReactProps = {
@@ -64,16 +63,7 @@ export const NhoodChart = ({
 
   return (
     <div className="border rounded p-4 shadow">
-      <div className="flex">
-        <p className="text-lg font-semibold">Capacity by neighborhood</p>
-        <button
-          onClick={() => setShowAll(!showAll)}
-          className="ml-2"
-          disabled={Object.keys(capacityByNhood).length === 0}
-        >
-          {showAll ? "Hide" : "Show all"}
-        </button>
-      </div>
+      <p className="text-lg font-semibold">Capacity by neighborhood</p>
       <HighchartsReact highcharts={Highcharts} options={options} />
     </div>
   );

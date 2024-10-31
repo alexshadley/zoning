@@ -6,13 +6,22 @@ import {
   MapView,
   MapViewState,
   PickingInfo,
+  TextLayer,
   TileLayer,
 } from "deck.gl";
+import StaticMap from "react-map-gl";
 import type { TileLayerPickingInfo } from "@deck.gl/geo-layers";
-import { Feature, Geometry } from "geojson";
+import {
+  FeatureCollection,
+  Feature,
+  Geometry,
+  Polygon,
+  MultiPolygon,
+} from "geojson";
 import { memo, useCallback, useMemo } from "react";
 import chroma from "chroma-js";
 import { RezonedParcel } from "./types";
+import { BASEMAP } from "@deck.gl/carto";
 
 type ParcelData = {
   blklot: string;
@@ -29,16 +38,47 @@ const storiesFromHeight = (height: number) => {
   return Math.floor(height / 10);
 };
 
-const getColorForCapacityAdded = (unitsAdded: number) => {
+const getColorForCapacityAdded = (
+  unitsAdded: number
+): [number, number, number] => {
   if (unitsAdded < 1) {
-    return chroma("lightgray").rgb();
+    return [220, 220, 220];
   }
 
   const clamped = Math.min(50, Math.max(0, unitsAdded));
   return COLOR_SCALE(clamped / 50).rgb();
 };
 
-type Parcel = Feature<Geometry, ParcelData>;
+type Parcel = Feature<MultiPolygon, ParcelData>;
+
+type Parcels = FeatureCollection<MultiPolygon, ParcelData>;
+
+function getPolygonCentroid(p: MultiPolygon) {
+  const pts = p.coordinates[0][0].map((coord) => ({
+    x: coord[0],
+    y: coord[1],
+  }));
+  var first = pts[0],
+    last = pts[pts.length - 1];
+  if (first.x != last.x || first.y != last.y) pts.push(first);
+  var twicearea = 0,
+    x = 0,
+    y = 0,
+    nPts = pts.length,
+    p1,
+    p2,
+    f;
+  for (var i = 0, j = nPts - 1; i < nPts; j = i++) {
+    p1 = pts[i];
+    p2 = pts[j];
+    f = p1.x * p2.y - p2.x * p1.y;
+    twicearea += f;
+    x += (p1.x + p2.x) * f;
+    y += (p1.y + p2.y) * f;
+  }
+  f = twicearea * 3;
+  return [x / f, y / f];
+}
 
 export const ParcelMap = memo(
   ({
@@ -49,8 +89,8 @@ export const ParcelMap = memo(
     showNhoodOverlay,
     exaggeratedHeights,
   }: {
-    parcels: any;
-    nhoodGeoms: any;
+    parcels: Parcels;
+    nhoodGeoms: FeatureCollection<MultiPolygon, { nhood: string }>;
     rezonedParcels: { [blklot: string]: RezonedParcel } | null;
     is3D: boolean;
     showNhoodOverlay: boolean;
@@ -58,7 +98,7 @@ export const ParcelMap = memo(
   }) => {
     const tileLayer = new TileLayer({
       id: "TileLayer",
-      data: "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
+      data: "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
       maxZoom: 19,
       minZoom: 0,
       tileSize: 256,
@@ -87,9 +127,26 @@ export const ParcelMap = memo(
         properties: { name: nhood.properties.nhood },
       })),
       filled: false,
-      getLineWidth: 5,
-      getLineColor: [247, 121, 218, 200],
-      lineWidthMinPixels: 4,
+      lineWidthUnits: "meters",
+      getLineWidth: 10,
+      getLineColor: [0, 0, 0, 50],
+      lineWidthMinPixels: 2,
+    });
+
+    const textLayer = new TextLayer({
+      id: "text-layer",
+      data: nhoodGeoms.features.map((feature) => ({
+        position: getPolygonCentroid(feature.geometry),
+        name: feature.properties.nhood,
+      })),
+      getPosition: (d) => d.position,
+      getText: (d) => d.name,
+      sizeUnits: "meters",
+      getSize: 100,
+      sizeMaxPixels: 25,
+      getColor: [0, 0, 0, 200],
+      getTextAnchor: "middle",
+      getAlignmentBaseline: "center",
     });
 
     let data: Parcel[];
@@ -167,9 +224,10 @@ export const ParcelMap = memo(
       const ls = [tileLayer, parcelLayer];
       if (showNhoodOverlay) {
         ls.push(nhoodLayer);
+        ls.push(textLayer);
       }
       return ls;
-    }, [tileLayer, parcelLayer, nhoodLayer, showNhoodOverlay]);
+    }, [tileLayer, parcelLayer, nhoodLayer, textLayer, showNhoodOverlay]);
 
     return (
       <div className="relative flex-1">
@@ -182,7 +240,7 @@ export const ParcelMap = memo(
           controller
           layers={layers}
           getTooltip={getTooltip}
-        />
+        ></DeckGL>
       </div>
     );
   }

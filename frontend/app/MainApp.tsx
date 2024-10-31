@@ -46,8 +46,8 @@ export const MainApp = ({
   const [rezoningProgress, setRezoningProgress] = useState(0.0);
 
   // viz settings
-  const [is3D, setIs3D] = useState(false);
-  const [showNhoodOverlay, setShowNhoodOverlay] = useState(false);
+  const [is3D, setIs3D] = useState(true);
+  const [showNhoodOverlay, setShowNhoodOverlay] = useState(true);
   const [showExaggeratedHeights, setShowExaggeratedHeights] = useState(false);
 
   const handleRezone = async () => {
@@ -108,7 +108,7 @@ export const MainApp = ({
   return (
     <div style={{ width: "calc(100vw - 50px)", height: "calc(100vh - 50px)" }}>
       <div className="flex h-full gap-4">
-        <div className="flex flex-col gap-4 basis-1/5 overflow-y-scroll">
+        <div className="flex flex-col gap-4 basis-1/5 overflow-y-auto">
           <div className="flex flex-col gap-4 border rounded p-4 shadow">
             <div className="flex justify-between">
               <p className="text-lg">Zoning settings</p>
@@ -203,7 +203,7 @@ export const MainApp = ({
             </div>
           </div>
         </div>
-        <div className="basis-1/5 flex flex-col gap-4 overflow-y-scroll">
+        <div className="basis-1/5 flex flex-col gap-4 overflow-y-auto">
           <ParcelHistogram rezonedParcels={rezonedParcels ?? {}} />
           <NhoodChart capacityByNhood={capacityByNhood} />
         </div>
