@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useEffect } from "react";
 
 import { ParcelMap } from "./ParcelMap";
@@ -28,6 +28,8 @@ export const MainApp = ({
   parcels: any;
   nhoodGeoms: any;
 }) => {
+  const [urlParamsRead, setUrlParamsRead] = useState(false);
+
   // zoning settings
   const [distance, setDistance] = useState("10");
   const [heightMultiple, setHeightMultiple] = useState("1.3");
@@ -51,32 +53,49 @@ export const MainApp = ({
   const [showNhoodOverlay, setShowNhoodOverlay] = useState(true);
   const [showExaggeratedHeights, setShowExaggeratedHeights] = useState(false);
 
-  // TODO: read url params
-  // useEffect(() => {
-  //   const selectedNhoodsStr = selectedNhoods
-  //     .map((n) => AllNhoods.indexOf(n))
-  //     .join(",");
+  useEffect(() => {
+    try {
+      const url = new URL(window.location.href);
+      const params = new URLSearchParams(url.search);
+      const selectedNhoods = params
+        .get("selectedNhoods")
+        ?.split(",")
+        .map((n) => AllNhoods[parseInt(n)]);
+      const distance = params.get("distance");
+      const heightMultiple = params.get("heightMultiple");
 
-  //   const params = new URLSearchParams({
-  //     selectedNhoods: selectedNhoodsStr,
-  //     distance,
-  //     heightMultiple,
-  //   });
-  //   window.history.replaceState({}, "", `?${params.toString()}`);
-  // }, []);
+      if (selectedNhoods) {
+        setSelectedNhoods(selectedNhoods);
+      }
+      if (distance) {
+        setDistance(distance);
+      }
+      if (heightMultiple) {
+        setHeightMultiple(heightMultiple);
+      }
+
+      setUrlParamsRead(true);
+    } catch {
+      console.log("error parsing url");
+    }
+  }, []);
 
   useEffect(() => {
+    if (!urlParamsRead) {
+      return;
+    }
+
     const selectedNhoodsStr = selectedNhoods
       .map((n) => AllNhoods.indexOf(n))
       .join(",");
 
     const params = new URLSearchParams({
-      selectedNhoods: selectedNhoodsStr,
       distance,
       heightMultiple,
+      selectedNhoods: selectedNhoodsStr,
     });
     window.history.replaceState({}, "", `?${params.toString()}`);
-  }, [selectedNhoods, distance, heightMultiple]);
+  }, [selectedNhoods, distance, heightMultiple, urlParamsRead]);
 
   const handleRezone = async () => {
     const distanceNum = parseFloat(distance);

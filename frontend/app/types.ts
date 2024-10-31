@@ -22,7 +22,6 @@ export const AllNhoods = [
   "North Beach",
   "Noe Valley",
   "Lone Mountain/USF",
-  "Lincoln Park",
   "Seacliff",
   "Nob Hill",
   "Mission Bay",
@@ -31,7 +30,6 @@ export const AllNhoods = [
   "Marina",
   "Lakeshore",
   "Tenderloin",
-  "McLaren Park",
   "Japantown",
   "Inner Sunset",
   "Hayes Valley",
@@ -49,4 +47,6 @@ export const AllNhoods = [
   // Don't worry we're not coming for your parks
   // "Golden Gate Park",
   // "Presidio",
+  // "Lincoln Park",
+  // "McLaren Park",
 ];
