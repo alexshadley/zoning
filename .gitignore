@@ -1,8 +1,8 @@
 .ipynb_checkpoints
 .DS_Store
-data/
+/data/
 .gitignore
 frontend/node_modules/
 frontend/.next
-frontend/data
+# frontend/data
 .env
