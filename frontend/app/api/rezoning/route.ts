@@ -8,9 +8,9 @@ export async function GET(request: NextRequest) {
     nextUrl: { searchParams },
   } = request;
 
-  if (!searchParams.has("distance") || !searchParams.has("heightMultiple")) {
+  if (!searchParams.has("distance") || !searchParams.has("heightMultiple") || !searchParams.has("localHeight")) {
     return NextResponse.json(
-      { error: "distance and heightMultiple are required" },
+      { error: "distance, heightMultiple, and localHeight are required" },
       { status: 400 }
     );
   }
@@ -18,6 +18,23 @@ export async function GET(request: NextRequest) {
   // const limit = searchParams.get("limit") ?? 1000000;
   // const offset = searchParams.get("offset") ?? 0;
   // const nhood = searchParams.get("nhood") ?? "South of Market";
+
+  const distance = searchParams.get("distance");
+  const heightMultiple = searchParams.get("heightMultiple");
+  const nhood = searchParams.get("nhood");
+  const localHeight = searchParams.get("localHeight");
+
+  const nearbyHeightAggregate = (() => {
+    switch (localHeight) {
+      case "mean":
+        return "AVG(nearby.height)";
+      case "median":
+        return "PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY nearby.height)";
+      case "max":
+      default:
+        return "MAX(nearby.height)";
+    }
+  })();
 
   const { rows } = await client.query(
     `
@@ -39,8 +56,8 @@ export async function GET(request: NextRequest) {
         p.blklot,
         GREATEST(MAX(p.height), MAX(p.gen_hght)) as height, -- use greater of existing height and existing zoning to determine squo capacity
         MAX(p.area_sq_ft) as area_sq_ft,
-        MAX(nearby.height) AS nearby_height,
-        MAX(nearby.height) * $2 AS new_zoned_height
+        ${nearbyHeightAggregate} AS nearby_height,
+        ${nearbyHeightAggregate} * $2 AS new_zoned_height
       FROM parcels_to_evaluate p
       JOIN prc_hgt_bldg AS nearby
         ON ST_DWithin(p.geometry, nearby.geometry, $1)
@@ -99,11 +116,8 @@ export async function GET(request: NextRequest) {
   FROM capacity_calculations
   ;
   `,
-    [
-      searchParams.get("distance"),
-      searchParams.get("heightMultiple"),
-      searchParams.get("nhood"),
-    ]
+      [distance, heightMultiple, nhood,]
+    
   );
 
   client.end();

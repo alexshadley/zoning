@@ -36,7 +36,7 @@ export const MainApp = ({
   const [selectedNhoods, setSelectedNhoods] = useState<string[]>([
     ...DefaultNhoods,
   ]);
-
+  const [localHeight, setLocalHeight] = useState('max');
   const [errorMessage, setErrorMessage] = useState<null | string>(null);
   const [nominalCapacity, setNominalCapacity] = useState(0);
   const [capacityByNhood, setCapacityByNhood] = useState<
@@ -92,10 +92,11 @@ export const MainApp = ({
     const params = new URLSearchParams({
       distance,
       heightMultiple,
+      localHeight,
       selectedNhoods: selectedNhoodsStr,
     });
     window.history.replaceState({}, "", `?${params.toString()}`);
-  }, [selectedNhoods, distance, heightMultiple, urlParamsRead]);
+  }, [selectedNhoods, distance, heightMultiple, urlParamsRead, localHeight]);
 
   const handleRezone = async () => {
     const distanceNum = parseFloat(distance);
@@ -121,7 +122,7 @@ export const MainApp = ({
         const nextNhood = nhoodsToFetch.pop()!;
         console.log("fetch nhood", nextNhood);
         fetch(
-          `/api/rezoning?distance=${distance}&heightMultiple=${heightMultiple}&nhood=${nextNhood}`
+          `/api/rezoning?distance=${distance}&heightMultiple=${heightMultiple}&nhood=${nextNhood}&localHeight=${localHeight}`
         ).then(async (response) => {
           const body = await response.json();
 
@@ -186,6 +187,18 @@ export const MainApp = ({
                 onChange={(e) => setHeightMultiple(e.currentTarget.value)}
               />
             </div>
+           <div>
+                <p>Local height</p>
+                <select
+                  className="border rounded p-1"
+                  value={localHeight}
+                  onChange={(e) => setLocalHeight(e.currentTarget.value)}
+                >
+                  <option value="max">max</option>
+                  <option value="mean">mean</option>
+                  <option value="median">median</option>
+                </select>
+              </div>
             <NhoodSelector
               selectedNhoods={selectedNhoods}
               toggleNhood={(nhood) =>
