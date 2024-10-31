@@ -9,14 +9,14 @@ export const NhoodChart = ({
 }: {
   capacityByNhood: Record<string, number>;
 }) => {
-  const [showAll, setShowAll] = useState(false);
+  const [showAll, setShowAll] = useState(true);
   if (Object.keys(capacityByNhood).length === 0) {
     return null;
   }
 
   const sortedCapacityByNhood = Object.entries(capacityByNhood)
     .sort(([, a], [, b]) => b - a)
-    .slice(0, showAll ? undefined : 10);
+    .slice(0, showAll ? undefined : 20);
 
   // bar chart
   const options: HighchartsReactProps = {
@@ -30,6 +30,22 @@ export const NhoodChart = ({
     },
     xAxis: {
       categories: sortedCapacityByNhood.map(([nhood]) => nhood),
+      labels: {
+        formatter: function (): string {
+          if (this.value.length > 12) {
+            return this.value.slice(0, 12) + "...";
+          }
+
+          return this.value;
+        },
+      },
+      // labels: {
+      //   style: {
+      //     wordBreak: "break-all",
+      //     maxWidth: "50px",
+      //     whiteSpace: "normal",
+      //   },
+      // },
     },
     yAxis: {
       min: 0,

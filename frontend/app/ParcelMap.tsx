@@ -12,6 +12,7 @@ import type { TileLayerPickingInfo } from "@deck.gl/geo-layers";
 import { Feature, Geometry } from "geojson";
 import { memo, useCallback, useMemo } from "react";
 import chroma from "chroma-js";
+import { RezonedParcel } from "./types";
 
 type ParcelData = {
   blklot: string;
@@ -46,12 +47,14 @@ export const ParcelMap = memo(
     rezonedParcels,
     is3D,
     showNhoodOverlay,
+    exaggeratedHeights,
   }: {
     parcels: any;
     nhoodGeoms: any;
     rezonedParcels: { [blklot: string]: RezonedParcel } | null;
     is3D: boolean;
     showNhoodOverlay: boolean;
+    exaggeratedHeights: boolean;
   }) => {
     const tileLayer = new TileLayer({
       id: "TileLayer",
@@ -84,10 +87,9 @@ export const ParcelMap = memo(
         properties: { name: nhood.properties.nhood },
       })),
       filled: false,
-      // lineWidthUnits: "pixels",
       getLineWidth: 5,
       getLineColor: [247, 121, 218, 200],
-      lineWidthMinPixels: 5,
+      lineWidthMinPixels: 4,
     });
 
     let data: Parcel[];
@@ -131,7 +133,8 @@ export const ParcelMap = memo(
       extruded: is3D,
       wireframe: true,
       // height is in feet, convert to meters
-      getElevation: (f: Parcel) => f.properties.height / 3.28084,
+      getElevation: (f: Parcel) =>
+        (f.properties.height / 3.28084) * (exaggeratedHeights ? 5 : 1),
       getText: (f: Parcel) =>
         `zoned: ${f.properties.zoned_height}; actual: ${f.properties.height}`,
       pickable: true,

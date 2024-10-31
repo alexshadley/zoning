@@ -6,55 +6,18 @@ import { ParcelMap } from "./ParcelMap";
 import _, { set } from "lodash";
 import next from "next";
 import { NhoodChart } from "./NhoodChart";
+import { NhoodSelector } from "./NhoodSelector";
+import { AllNhoods, RezonedParcel } from "./types";
+import { ParcelHistogram } from "./ParcelHistogram";
 
 const MAX_INFLIGHT = 4;
-const BATCH_SIZE = 10000;
 
-const APPROX_NUM_PARCELS = 160000;
-
-const nhoods = [
-  "Western Addition",
-  "West of Twin Peaks",
-  "Visitacion Valley",
-  "Twin Peaks",
-  "South of Market",
-  "Presidio Heights",
-  "Presidio",
-  "Potrero Hill",
-  "Portola",
-  "Pacific Heights",
+const DefaultNhoods = [
   "Outer Richmond",
-  "Outer Mission",
-  "Sunset/Parkside",
-  "Oceanview/Merced/Ingleside",
-  "North Beach",
-  "Noe Valley",
-  "Lone Mountain/USF",
-  "Lincoln Park",
-  "Seacliff",
-  "Nob Hill",
-  "Mission Bay",
-  "Mission",
-  "Russian Hill",
-  "Marina",
-  "Lakeshore",
-  "Tenderloin",
-  "McLaren Park",
-  "Japantown",
   "Inner Sunset",
-  "Hayes Valley",
-  "Haight Ashbury",
-  "Golden Gate Park",
-  "Inner Richmond",
-  "Glen Park",
-  "Financial District/South Beach",
-  "Excelsior",
-  "Chinatown",
-  "Castro/Upper Market",
-  "Bernal Heights",
-  "Bayview Hunters Point",
-  // We have some data cleaning to do here
-  // "Treasure Island",
+  "Sunset/Parkside",
+  "Seacliff",
+  "West of Twin Peaks",
 ];
 
 export const MainApp = ({
@@ -64,8 +27,13 @@ export const MainApp = ({
   parcels: any;
   nhoodGeoms: any;
 }) => {
+  // zoning settings
   const [distance, setDistance] = useState("10");
   const [heightMultiple, setHeightMultiple] = useState("1.3");
+  const [selectedNhoods, setSelectedNhoods] = useState<string[]>([
+    ...DefaultNhoods,
+  ]);
+
   const [errorMessage, setErrorMessage] = useState<null | string>(null);
   const [nominalCapacity, setNominalCapacity] = useState(0);
   const [capacityByNhood, setCapacityByNhood] = useState<
@@ -75,8 +43,12 @@ export const MainApp = ({
   const [rezonedParcels, setRezonedParcels] = useState<null | {
     [blklot: string]: RezonedParcel;
   }>(null);
+  const [rezoningProgress, setRezoningProgress] = useState(0.0);
+
+  // viz settings
   const [is3D, setIs3D] = useState(false);
   const [showNhoodOverlay, setShowNhoodOverlay] = useState(false);
+  const [showExaggeratedHeights, setShowExaggeratedHeights] = useState(false);
 
   const handleRezone = async () => {
     const distanceNum = parseFloat(distance);
@@ -91,7 +63,7 @@ export const MainApp = ({
     setErrorMessage(null);
 
     let inflightCount = 0;
-    let nhoodsToFetch = [...nhoods];
+    let nhoodsToFetch = [...selectedNhoods];
 
     setRezoneInProgress(true);
     setRezonedParcels({});
@@ -118,6 +90,10 @@ export const MainApp = ({
           );
           setCapacityByNhood((prev) => ({ ...prev, [nextNhood]: capacity }));
           setNominalCapacity((prev) => prev + capacity);
+          setRezoningProgress(
+            (selectedNhoods.length - nhoodsToFetch.length) /
+              selectedNhoods.length
+          );
 
           inflightCount -= 1;
         });
@@ -130,11 +106,23 @@ export const MainApp = ({
   };
 
   return (
-    <div style={{ width: "90%", height: "90%" }}>
-      <div className="flex h-full gap-8">
-        <div className="flex flex-col gap-8 basis-1/5">
+    <div style={{ width: "calc(100vw - 50px)", height: "calc(100vh - 50px)" }}>
+      <div className="flex h-full gap-4">
+        <div className="flex flex-col gap-4 basis-1/5 overflow-y-scroll">
           <div className="flex flex-col gap-4 border rounded p-4 shadow">
-            <p className="text-lg">Zoning settings</p>
+            <div className="flex justify-between">
+              <p className="text-lg">Zoning settings</p>
+              <div>
+                {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+                <button
+                  className="text-white bg-blue-500 px-2 py-1 rounded"
+                  onClick={handleRezone}
+                  disabled={rezoneInProgress}
+                >
+                  Rezone!
+                </button>
+              </div>
+            </div>
             <div>
               <p>Distance (m)</p>
               <input
@@ -151,12 +139,18 @@ export const MainApp = ({
                 onChange={(e) => setHeightMultiple(e.currentTarget.value)}
               />
             </div>
-            <div>
-              {errorMessage && <p className="text-red-500">{errorMessage}</p>}
-              <button onClick={handleRezone} disabled={rezoneInProgress}>
-                Rezone!
-              </button>
-            </div>
+            <NhoodSelector
+              selectedNhoods={selectedNhoods}
+              toggleNhood={(nhood) =>
+                setSelectedNhoods((prev) =>
+                  prev.includes(nhood)
+                    ? prev.filter((n) => n !== nhood)
+                    : [...prev, nhood]
+                )
+              }
+              onSelectAll={() => setSelectedNhoods([...AllNhoods])}
+              onDeselectAll={() => setSelectedNhoods([])}
+            />
             {rezoneInProgress && rezonedParcels && (
               <div
                 className="w-full h-2"
@@ -166,10 +160,8 @@ export const MainApp = ({
                   className="h-full"
                   style={{
                     backgroundColor: "green",
-                    width: `${
-                      (Object.values(rezonedParcels).length * 100) /
-                      APPROX_NUM_PARCELS
-                    }%`,
+                    width: `${rezoningProgress * 100}%`,
+                    transition: "width 0.5s",
                   }}
                 ></div>
               </div>
@@ -198,9 +190,21 @@ export const MainApp = ({
               />
               <p>Neighborhood overlay</p>
             </div>
+            <div className="flex gap-2">
+              <input
+                type="checkbox"
+                id="nhood-overlay"
+                checked={showExaggeratedHeights}
+                onChange={(e) =>
+                  setShowExaggeratedHeights(e.currentTarget.checked)
+                }
+              />
+              <p>Exaggerated building heights</p>
+            </div>
           </div>
         </div>
-        <div className="basis-1/5">
+        <div className="basis-1/5 flex flex-col gap-4 overflow-y-scroll">
+          <ParcelHistogram rezonedParcels={rezonedParcels ?? {}} />
           <NhoodChart capacityByNhood={capacityByNhood} />
         </div>
         <ParcelMap
@@ -209,6 +213,7 @@ export const MainApp = ({
           rezonedParcels={rezonedParcels}
           is3D={is3D}
           showNhoodOverlay={showNhoodOverlay}
+          exaggeratedHeights={showExaggeratedHeights}
         />
       </div>
     </div>
