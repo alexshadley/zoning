@@ -14,6 +14,7 @@ const MAX_INFLIGHT = 4;
 
 const DefaultNhoods = [
   "Outer Richmond",
+  "Inner Richmond",
   "Inner Sunset",
   "Sunset/Parkside",
   "Seacliff",
@@ -49,6 +50,33 @@ export const MainApp = ({
   const [is3D, setIs3D] = useState(true);
   const [showNhoodOverlay, setShowNhoodOverlay] = useState(true);
   const [showExaggeratedHeights, setShowExaggeratedHeights] = useState(false);
+
+  // TODO: read url params
+  // useEffect(() => {
+  //   const selectedNhoodsStr = selectedNhoods
+  //     .map((n) => AllNhoods.indexOf(n))
+  //     .join(",");
+
+  //   const params = new URLSearchParams({
+  //     selectedNhoods: selectedNhoodsStr,
+  //     distance,
+  //     heightMultiple,
+  //   });
+  //   window.history.replaceState({}, "", `?${params.toString()}`);
+  // }, []);
+
+  useEffect(() => {
+    const selectedNhoodsStr = selectedNhoods
+      .map((n) => AllNhoods.indexOf(n))
+      .join(",");
+
+    const params = new URLSearchParams({
+      selectedNhoods: selectedNhoodsStr,
+      distance,
+      heightMultiple,
+    });
+    window.history.replaceState({}, "", `?${params.toString()}`);
+  }, [selectedNhoods, distance, heightMultiple]);
 
   const handleRezone = async () => {
     const distanceNum = parseFloat(distance);

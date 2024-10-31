@@ -139,6 +139,9 @@ export const ParcelMap = memo(
         position: getPolygonCentroid(feature.geometry),
         name: feature.properties.nhood,
       })),
+      parameters: {
+        depthTest: false,
+      },
       getPosition: (d) => d.position,
       getText: (d) => d.name,
       sizeUnits: "meters",
