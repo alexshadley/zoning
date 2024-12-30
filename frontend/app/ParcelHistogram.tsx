@@ -46,7 +46,6 @@ export const ParcelHistogram = ({
       },
     ],
   };
-  console.log(bins);
 
   return (
     <div className="border rounded p-4 shadow">
