@@ -1,6 +1,7 @@
 "use client";
 import { useRef, useState } from "react";
 import { useEffect } from "react";
+import Image from "next/image";
 
 import { ParcelMap } from "./ParcelMap";
 import _, { set } from "lodash";
@@ -29,6 +30,8 @@ export const MainApp = ({
   nhoodGeoms: any;
 }) => {
   const [urlParamsRead, setUrlParamsRead] = useState(false);
+
+  const [showHelpScreen, setShowHelpScreen] = useState(false);
 
   // zoning settings
   const [distance, setDistance] = useState("10");
@@ -154,7 +157,41 @@ export const MainApp = ({
   };
 
   return (
-    <div style={{ width: "calc(100vw - 50px)", height: "calc(100vh - 50px)" }}>
+    <div className="w-full h-full">
+      {showHelpScreen && (
+        <>
+          <div
+            className="absolute z-10 w-full h-full"
+            style={{ backgroundColor: "#000", opacity: 0.5 }}
+          />
+          <div
+            className="absolute z-20 w-full h-full flex items-center justify-center flex-col gap-4"
+            onClick={() => setShowHelpScreen(false)}
+          >
+            <Image
+              src="/images/explainer.png"
+              alt=""
+              width={1894}
+              height={922}
+            />
+            <button
+              className="text-white bg-blue-500 px-2 py-1 rounded text-2xl"
+              onClick={() => setShowHelpScreen(false)}
+            >
+              Let's upzone!
+            </button>
+          </div>
+        </>
+      )}
+      <div className="flex gap-4 items-center">
+        <div className="text-3xl mb-2">Contextual Upzoning Simulator</div>
+        <div
+          className="cursor-pointer text-xl"
+          onClick={() => setShowHelpScreen(true)}
+        >
+          ℹ️
+        </div>
+      </div>
       <div className="flex h-full gap-4">
         <div className="flex flex-col gap-4 basis-1/5 overflow-y-auto">
           <div className="flex flex-col gap-4 border rounded p-4 shadow">

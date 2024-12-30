@@ -5,7 +5,7 @@ import { MainApp } from "./MainApp";
 
 export default function Home() {
   return (
-    <div className="flex justify-center items-center h-screen">
+    <div className="flex justify-center items-center h-screen m-8">
       <MainApp parcels={Parcels} nhoodGeoms={NhoodGeoms} />
     </div>
   );

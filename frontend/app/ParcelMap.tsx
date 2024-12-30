@@ -233,12 +233,13 @@ export const ParcelMap = memo(
     }, [tileLayer, parcelLayer, nhoodLayer, textLayer, showNhoodOverlay]);
 
     return (
-      <div className="relative flex-1">
+      // 85vh is a little lazy but works well enough
+      <div className="relative flex-1" style={{ height: "85vh" }}>
         <DeckGL
           initialViewState={{
-            longitude: -122.4,
-            latitude: 37.74,
-            zoom: 11,
+            longitude: -122.44385,
+            latitude: 37.75762,
+            zoom: 12,
           }}
           controller
           layers={layers}
