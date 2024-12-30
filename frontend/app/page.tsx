@@ -4,9 +4,5 @@ import NhoodGeoms from "../data/nhoods.geo.json";
 import { MainApp } from "./MainApp";
 
 export default function Home() {
-  return (
-    <div className="flex justify-center items-center h-screen m-8">
-      <MainApp parcels={Parcels} nhoodGeoms={NhoodGeoms} />
-    </div>
-  );
+  return <MainApp parcels={Parcels} nhoodGeoms={NhoodGeoms} />;
 }

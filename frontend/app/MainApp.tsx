@@ -39,7 +39,7 @@ export const MainApp = ({
   const [selectedNhoods, setSelectedNhoods] = useState<string[]>([
     ...DefaultNhoods,
   ]);
-  const [localHeight, setLocalHeight] = useState('max');
+  const [localHeight, setLocalHeight] = useState("max");
   const [errorMessage, setErrorMessage] = useState<null | string>(null);
   const [nominalCapacity, setNominalCapacity] = useState(0);
   const [capacityByNhood, setCapacityByNhood] = useState<
@@ -157,7 +157,7 @@ export const MainApp = ({
   };
 
   return (
-    <div className="w-full h-full">
+    <div className="w-screen h-screen p-8">
       {showHelpScreen && (
         <>
           <div
@@ -183,7 +183,7 @@ export const MainApp = ({
           </div>
         </>
       )}
-      <div className="flex gap-4 items-center">
+      <div className="flex gap-4 items-center" style={{ height: "5%" }}>
         <div className="text-3xl mb-2">Contextual Upzoning Simulator</div>
         <div
           className="cursor-pointer text-xl"
@@ -192,7 +192,7 @@ export const MainApp = ({
           ℹ️
         </div>
       </div>
-      <div className="flex h-full gap-4">
+      <div className="flex gap-4" style={{ height: "95%" }}>
         <div className="flex flex-col gap-4 basis-1/5 overflow-y-auto">
           <div className="flex flex-col gap-4 border rounded p-4 shadow">
             <div className="flex justify-between">
@@ -224,18 +224,18 @@ export const MainApp = ({
                 onChange={(e) => setHeightMultiple(e.currentTarget.value)}
               />
             </div>
-           <div>
-                <p>Local height</p>
-                <select
-                  className="border rounded p-1"
-                  value={localHeight}
-                  onChange={(e) => setLocalHeight(e.currentTarget.value)}
-                >
-                  <option value="max">max</option>
-                  <option value="mean">mean</option>
-                  <option value="median">median</option>
-                </select>
-              </div>
+            <div>
+              <p>Local height</p>
+              <select
+                className="border rounded p-1"
+                value={localHeight}
+                onChange={(e) => setLocalHeight(e.currentTarget.value)}
+              >
+                <option value="max">max</option>
+                <option value="mean">mean</option>
+                <option value="median">median</option>
+              </select>
+            </div>
             <NhoodSelector
               selectedNhoods={selectedNhoods}
               toggleNhood={(nhood) =>

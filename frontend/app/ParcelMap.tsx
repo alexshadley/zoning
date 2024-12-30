@@ -234,7 +234,7 @@ export const ParcelMap = memo(
 
     return (
       // 85vh is a little lazy but works well enough
-      <div className="relative flex-1" style={{ height: "85vh" }}>
+      <div className="relative flex-1">
         <DeckGL
           initialViewState={{
             longitude: -122.44385,
