@@ -23,6 +23,14 @@ export async function GET(request: NextRequest) {
   const heightMultiple = searchParams.get("heightMultiple");
   const nhood = searchParams.get("nhood");
   const localHeight = searchParams.get("localHeight");
+  const codesToDrop = [
+    'Under Water Lot',
+    'Industrial Gov Mixed/Other Use',
+    'Vacant Lot Comm and Ind', 
+    'Possessory Interest', 
+    'Industrial Gov',
+    'Vacant Lot Gov'
+]
 
   const nearbyHeightAggregate = (() => {
     switch (localHeight) {
@@ -105,18 +113,20 @@ export async function GET(request: NextRequest) {
     END * 0.8) / 1000 AS new_capacity
   FROM parcel_calculations pc
   )
-  select blklot,
-         nearby_height, 
-         new_zoned_height, 
-         CASE WHEN new_capacity < squo_capacity
-          THEN 0
-          ELSE
-          LEAST(ROUND(new_capacity - squo_capacity), 1000)
-         END as added_capacity
-  FROM capacity_calculations
+  select c.blklot,
+         c.nearby_height, 
+         c.new_zoned_height, 
+         CASE 
+            WHEN a."Property Class Code Definition" = ANY($4) THEN 0
+            WHEN c.new_capacity < c.squo_capacity THEN 0
+            ELSE LEAST(ROUND(c.new_capacity - c.squo_capacity), 1000)
+          END AS added_capacity
+          FROM capacity_calculations c
+          JOIN assessor a 
+          ON c.blklot = a."Parcel Number";
   ;
   `,
-      [distance, heightMultiple, nhood,]
+      [distance, heightMultiple, nhood, codesToDrop]
     
   );
 
