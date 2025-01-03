@@ -117,13 +117,14 @@ export async function GET(request: NextRequest) {
          c.nearby_height, 
          c.new_zoned_height, 
          CASE 
-            WHEN a."Property Class Code Definition" = ANY($4) THEN 0
+            WHEN t."Property Class Code Definition" = ANY($4) THEN 0
+            WHEN t."Use Code" = 'GOVT' THEN 0
             WHEN c.new_capacity < c.squo_capacity THEN 0
             ELSE LEAST(ROUND(c.new_capacity - c.squo_capacity), 1000)
           END AS added_capacity
           FROM capacity_calculations c
-          JOIN assessor a 
-          ON c.blklot = a."Parcel Number";
+          JOIN tax t
+          ON c.blklot = t."Parcel Number";
   ;
   `,
       [distance, heightMultiple, nhood, codesToDrop]
