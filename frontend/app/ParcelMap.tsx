@@ -204,18 +204,23 @@ export const ParcelMap = memo(
       let text = null;
       if (info.object) {
         text = `zoned: ${info.object.properties.zoned_height}ft`;
-        text += `\nbuilt: ${info.object.properties.height}ft`;
+        text += `\nbuilt: ${Math.round(info.object.properties.height || 0)}ft`;
 
         if (info.object.properties.newZonedHeight) {
-          text += `\ntallest built nearby: ${info.object.properties.nearbyHeight}ft`;
-          text += `\nnew zoning height: ${info.object.properties.newZonedHeight}ft`;
-          text += `\nnew zoning capacity: ${Math.round(
-            info.object.properties.added_capacity || 0
-          )}`;
-          text += `\nzoning height increase: ${storiesFromHeight(
-            info.object.properties.newZonedHeight -
+          text += `\ntallest built nearby: ${Math.round(
+            info.object.properties.nearbyHeight || 0
+          )}ft`;
+          text += `\nnew zoning height: ${Math.round(
+            info.object.properties.newZonedHeight || 0
+          )}ft`;
+          text += `\nzoning height increase: ${
+            storiesFromHeight(
+              info.object.properties.newZonedHeight - 
               info.object.properties.zoned_height
           )} stories`;
+          text += `\nincreased zoning capacity: ${Math.round(
+            info.object.properties.added_capacity || 0, 
+          )} units`;
         }
 
         text += `\n\nblklot: ${info.object.properties.blklot}`;
