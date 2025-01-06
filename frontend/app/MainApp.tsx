@@ -10,6 +10,7 @@ import { NhoodChart } from "./NhoodChart";
 import { NhoodSelector } from "./NhoodSelector";
 import { AllNhoods, RezonedParcel } from "./types";
 import { ParcelHistogram } from "./ParcelHistogram";
+import TwitterShareButton from "./TwitterShareButton";
 
 const MAX_INFLIGHT = 4;
 
@@ -183,14 +184,17 @@ export const MainApp = ({
           </div>
         </>
       )}
-      <div className="flex gap-4 items-center" style={{ height: "5%" }}>
-        <div className="text-3xl mb-2">Contextual Upzoning Simulator</div>
-        <div
-          className="cursor-pointer text-xl"
-          onClick={() => setShowHelpScreen(true)}
-        >
-          ℹ️
+      <div className="flex justify-between">
+        <div className="flex gap-4 items-center" style={{ height: "5%" }}>
+          <div className="text-3xl mb-2">Contextual Upzoning Simulator</div>
+          <div
+            className="cursor-pointer text-xl"
+            onClick={() => setShowHelpScreen(true)}
+          >
+            ℹ️
+          </div>
         </div>
+        <TwitterShareButton />
       </div>
       <div className="flex gap-4" style={{ height: "95%" }}>
         <div className="flex flex-col gap-4 basis-1/5 overflow-y-auto">
