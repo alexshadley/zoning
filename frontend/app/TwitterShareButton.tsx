@@ -1,19 +1,29 @@
+import { usePathname } from "next/navigation";
 import React from "react";
 
 const TwitterShareButton = ({
-  url = window.location.href,
+  url,
   text = "Check this out!",
   hashtags = [],
   via = "",
   className = "",
+}: {
+  url?: string;
+  text?: string;
+  hashtags?: string[];
+  via?: string;
+  className?: string;
 }) => {
+  const pathname = usePathname();
+  const path = url ?? pathname;
+
   const handleShare = (e) => {
     e.preventDefault();
 
     // Construct the share URL
     const shareUrl = new URL("https://twitter.com/intent/tweet");
     const params = new URLSearchParams({
-      url: url,
+      url: path,
       text: text,
     });
 
