@@ -1,16 +1,16 @@
 "use client";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useEffect } from "react";
 import Image from "next/image";
 
-import { ParcelMap } from "./ParcelMap";
-import _, { set } from "lodash";
-import next from "next";
+import { ParcelMap, Parcels } from "./ParcelMap";
+import _ from "lodash";
 import { NhoodChart } from "./NhoodChart";
 import { NhoodSelector } from "./NhoodSelector";
 import { AllNhoods, RezonedParcel } from "./types";
 import { ParcelHistogram } from "./ParcelHistogram";
 import TwitterShareButton from "./TwitterShareButton";
+import { FeatureCollection, MultiPolygon } from "geojson";
 
 const MAX_INFLIGHT = 4;
 
@@ -27,8 +27,8 @@ export const MainApp = ({
   parcels,
   nhoodGeoms,
 }: {
-  parcels: any;
-  nhoodGeoms: any;
+  parcels: Parcels;
+  nhoodGeoms: FeatureCollection<MultiPolygon, { nhood: string }>;
 }) => {
   const [urlParamsRead, setUrlParamsRead] = useState(false);
 
@@ -115,7 +115,7 @@ export const MainApp = ({
     setErrorMessage(null);
 
     let inflightCount = 0;
-    let nhoodsToFetch = [...selectedNhoods];
+    const nhoodsToFetch = [...selectedNhoods];
 
     setRezoneInProgress(true);
     setRezonedParcels({});
@@ -179,7 +179,7 @@ export const MainApp = ({
               className="text-white bg-blue-500 px-2 py-1 rounded text-2xl"
               onClick={() => setShowHelpScreen(false)}
             >
-              Let's upzone!
+              {"Let's upzone!"}
             </button>
           </div>
         </>

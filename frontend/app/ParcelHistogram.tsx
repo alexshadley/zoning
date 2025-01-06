@@ -1,8 +1,7 @@
-import Highcharts, { animate } from "highcharts";
+import Highcharts from "highcharts";
 import HighchartsReact, {
   HighchartsReactProps,
 } from "highcharts-react-official";
-import { useState } from "react";
 import { RezonedParcel } from "./types";
 import HistogramModule from "highcharts/modules/histogram-bellcurve";
 import _ from "lodash";
