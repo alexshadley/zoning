@@ -68,6 +68,7 @@ export const MainApp = ({
         setLayout("desktop");
       } else {
         setLayout("mobile");
+        setIs3D(false);
       }
     };
 
@@ -311,6 +312,7 @@ export const MainApp = ({
                 id="3d"
                 checked={is3D}
                 onChange={(e) => setIs3D(e.currentTarget.checked)}
+                disabled={layout === "mobile"}
               />
               <p>3D map</p>
             </div>
