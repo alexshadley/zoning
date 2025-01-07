@@ -57,6 +57,30 @@ export const MainApp = ({
   const [showNhoodOverlay, setShowNhoodOverlay] = useState(true);
   const [showExaggeratedHeights, setShowExaggeratedHeights] = useState(false);
 
+  const [layout, setLayout] = useState<"mobile" | "desktop">("desktop");
+
+  // Track window size
+  useEffect(() => {
+    const handleResize = () => {
+      const lg = 1024;
+
+      if (window.innerWidth >= lg) {
+        setLayout("desktop");
+      } else {
+        setLayout("mobile");
+      }
+    };
+
+    // Set initial size
+    handleResize();
+
+    // Add event listener
+    window.addEventListener("resize", handleResize);
+
+    // Cleanup
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   useEffect(() => {
     try {
       const url = new URL(window.location.href);
@@ -118,6 +142,7 @@ export const MainApp = ({
     const nhoodsToFetch = [...selectedNhoods];
 
     setRezoneInProgress(true);
+    setRezoningProgress(0.0);
     setRezonedParcels({});
     setNominalCapacity(0);
     setCapacityByNhood({});
@@ -142,12 +167,11 @@ export const MainApp = ({
           );
           setCapacityByNhood((prev) => ({ ...prev, [nextNhood]: capacity }));
           setNominalCapacity((prev) => prev + capacity);
+          inflightCount -= 1;
           setRezoningProgress(
-            (selectedNhoods.length - nhoodsToFetch.length) /
+            (selectedNhoods.length - nhoodsToFetch.length - inflightCount) /
               selectedNhoods.length
           );
-
-          inflightCount -= 1;
         });
         inflightCount += 1;
       }
@@ -157,8 +181,21 @@ export const MainApp = ({
     setRezoneInProgress(false);
   };
 
+  const progressMeter = rezoneInProgress && rezonedParcels && (
+    <div className="w-full h-2" style={{ backgroundColor: "lightgray" }}>
+      <div
+        className="h-full"
+        style={{
+          backgroundColor: "green",
+          width: `${rezoningProgress * 100}%`,
+          transition: "width 0.5s",
+        }}
+      ></div>
+    </div>
+  );
+
   return (
-    <div className="w-screen h-screen p-8">
+    <div className={layout === "desktop" ? "w-screen h-screen p-8" : "p-4"}>
       {showHelpScreen && (
         <>
           <div
@@ -184,19 +221,28 @@ export const MainApp = ({
           </div>
         </>
       )}
-      <div className="flex justify-between">
-        <div className="flex gap-4 items-center" style={{ height: "5%" }}>
+      <div className="flex justify-between gap-4" style={{ height: "5%" }}>
+        <div className="flex gap-4 items-center">
           <div className="text-3xl mb-2">Contextual Upzoning Simulator</div>
-          <div
-            className="cursor-pointer text-xl"
-            onClick={() => setShowHelpScreen(true)}
-          >
-            ℹ️
-          </div>
+          {layout === "desktop" && (
+            <div
+              className="cursor-pointer text-xl"
+              onClick={() => setShowHelpScreen(true)}
+            >
+              ℹ️
+            </div>
+          )}
         </div>
-        <TwitterShareButton />
+        <div>
+          <TwitterShareButton />
+        </div>
       </div>
-      <div className="flex gap-4" style={{ height: "95%" }}>
+      <div
+        className={
+          layout === "desktop" ? "flex gap-4" : "flex gap-4 flex-col-reverse"
+        }
+        style={layout === "desktop" ? { height: "95%" } : undefined}
+      >
         <div className="flex flex-col gap-4 basis-1/5 overflow-y-auto">
           <div className="flex flex-col gap-4 border rounded p-4 shadow">
             <div className="flex justify-between">
@@ -204,7 +250,7 @@ export const MainApp = ({
               <div>
                 {errorMessage && <p className="text-red-500">{errorMessage}</p>}
                 <button
-                  className="text-white bg-blue-500 px-2 py-1 rounded"
+                  className="text-white bg-blue-500 px-3 py-1 rounded"
                   onClick={handleRezone}
                   disabled={rezoneInProgress}
                 >
@@ -252,21 +298,7 @@ export const MainApp = ({
               onSelectAll={() => setSelectedNhoods([...AllNhoods])}
               onDeselectAll={() => setSelectedNhoods([])}
             />
-            {rezoneInProgress && rezonedParcels && (
-              <div
-                className="w-full h-2"
-                style={{ backgroundColor: "lightgray" }}
-              >
-                <div
-                  className="h-full"
-                  style={{
-                    backgroundColor: "green",
-                    width: `${rezoningProgress * 100}%`,
-                    transition: "width 0.5s",
-                  }}
-                ></div>
-              </div>
-            )}
+            {progressMeter}
             <div>
               <p>Nominal capacity: {nominalCapacity}</p>
             </div>
@@ -308,14 +340,34 @@ export const MainApp = ({
           <ParcelHistogram rezonedParcels={rezonedParcels ?? {}} />
           <NhoodChart capacityByNhood={capacityByNhood} />
         </div>
-        <ParcelMap
-          parcels={parcels}
-          nhoodGeoms={nhoodGeoms}
-          rezonedParcels={rezonedParcels}
-          is3D={is3D}
-          showNhoodOverlay={showNhoodOverlay}
-          exaggeratedHeights={showExaggeratedHeights}
-        />
+        <div
+          className={layout === "desktop" ? "relative flex-1" : "relative"}
+          style={layout === "mobile" ? { height: "60vh" } : undefined}
+        >
+          <ParcelMap
+            parcels={parcels}
+            nhoodGeoms={nhoodGeoms}
+            rezonedParcels={rezonedParcels}
+            is3D={is3D}
+            showNhoodOverlay={showNhoodOverlay}
+            exaggeratedHeights={showExaggeratedHeights}
+          />
+        </div>
+        {layout === "mobile" && (
+          <div className="flex flex-col gap-4">
+            <div className="flex justify-between items-center">
+              <button
+                className="text-white bg-blue-500 px-3 py-1 rounded"
+                onClick={handleRezone}
+                disabled={rezoneInProgress}
+              >
+                Rezone!
+              </button>
+              <p>Nominal capacity: {nominalCapacity}</p>
+            </div>
+            {progressMeter}
+          </div>
+        )}
       </div>
     </div>
   );

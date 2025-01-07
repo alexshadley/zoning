@@ -224,18 +224,15 @@ export const ParcelMap = memo(function ParcelMap({
   }, [tileLayer, parcelLayer, nhoodLayer, textLayer, showNhoodOverlay]);
 
   return (
-    // 85vh is a little lazy but works well enough
-    <div className="relative flex-1">
-      <DeckGL
-        initialViewState={{
-          longitude: -122.44385,
-          latitude: 37.75762,
-          zoom: 12,
-        }}
-        controller
-        layers={layers}
-        getTooltip={getTooltip}
-      ></DeckGL>
-    </div>
+    <DeckGL
+      initialViewState={{
+        longitude: -122.44385,
+        latitude: 37.75762,
+        zoom: 12,
+      }}
+      controller
+      layers={layers}
+      getTooltip={getTooltip}
+    ></DeckGL>
   );
 });

@@ -44,10 +44,10 @@ const TwitterShareButton = ({
   return (
     <button
       onClick={handleShare}
-      className={`inline-flex items-center gap-2 px-4 py-2 text-white bg-blue-400 rounded-lg hover:bg-blue-500 transition-colors ${className}`}
+      className={`inline-flex items-center gap-2 px-4 py-2 text-white bg-black rounded-lg hover:bg-slate-600 transition-colors ${className}`}
       aria-label="Share on Twitter"
     >
-      <span>Share on Twitter</span>
+      Share on X
     </button>
   );
 };
