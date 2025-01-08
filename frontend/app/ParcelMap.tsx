@@ -24,7 +24,7 @@ type ParcelData = {
 const COLOR_SCALE = chroma.scale(["#3beb6a", "#3bb3eb"]);
 
 const storiesFromHeight = (height: number) => {
-  return Math.floor(height / 10);
+  return Math.max(0, Math.floor(height / 10));
 };
 
 const getColorForCapacityAdded = (
