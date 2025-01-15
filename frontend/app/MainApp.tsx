@@ -157,7 +157,34 @@ export const MainApp = ({
           const body = await response.json();
 
           setRezonedParcels((prev) => {
-            return { ...prev, ..._.keyBy(body.rezonedParcels, "blklot") };
+            const updated = { ...prev, ..._.keyBy(body.rezonedParcels, "blklot") };
+            const updatedArray = Object.values(updated) as RezonedParcel[];
+
+          
+            // find lots with biggest contribution to zoning cap
+            const capacityGtZero = updatedArray.filter((p) => p.added_capacity > 0).length;
+            const capacityGteOne = updatedArray.filter((p) => p.added_capacity >= 1).length;
+            const uniqueBlklotCount = new Set(updatedArray.map((p) => p.blklot)).size;
+            const totalAddedCapacity = updatedArray.reduce((sum, p) => sum + p.added_capacity, 0);
+            const top10 = [...updatedArray]
+            .sort((a, b) => b.added_capacity - a.added_capacity)
+            .slice(0, 10);
+        
+          // Print blocklots + added units
+          console.log(
+            `<< [${nextNhood}] Top 10 blocklots by added_capacity:`,
+            top10.map((p) => ({
+              blklot: p.blklot,
+              added_capacity: p.added_capacity,
+            }))
+          );
+            console.log(`<< [${nextNhood}] updated rezonedParcels count: ${updatedArray.length}`);
+            console.log(`<< [${nextNhood}] # with added_capacity > 0: ${capacityGtZero}`);
+            console.log(`<< [${nextNhood}] # with added_capacity >= 1: ${capacityGteOne}`);
+            console.log(`<< [${nextNhood}] # of unique blocklots: ${uniqueBlklotCount}`);
+            console.log(`<< [${nextNhood}] sum of updated added_capacity: ${totalAddedCapacity}`);
+
+            return updated;
           });
 
           const capacity = body.rezonedParcels.reduce(
@@ -166,6 +193,8 @@ export const MainApp = ({
             },
             0
           );
+          console.log(`<< [${nextNhood}] capacity from parcels:`, capacity);
+
           setCapacityByNhood((prev) => ({ ...prev, [nextNhood]: capacity }));
           setNominalCapacity((prev) => prev + capacity);
           inflightCount -= 1;
