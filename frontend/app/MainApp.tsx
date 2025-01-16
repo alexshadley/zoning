@@ -259,7 +259,7 @@ export const MainApp = ({
               className="cursor-pointer text-xl"
               onClick={() => setShowHelpScreen(true)}
             >
-              ℹ️
+              
             </div>
           )}
         </div>
@@ -288,26 +288,51 @@ export const MainApp = ({
                 </button>
               </div>
             </div>
+            {/* Distance (m) */}
             <div>
-              <p>Distance (m)</p>
+              <label className="relative group">
+                Distance (m)
+                <span className="inline-block cursor-pointer ml-1 text-blue-500">
+                  ℹ️
+                  <span className="absolute hidden group-hover:block w-64 p-2 mt-1 bg-gray-700 text-white text-m rounded shadow-lg z-50">
+                    This value controls what counts as a "nearby" building. Measured in meters, a distance of 100m is roughly a block; 
+                    a distance of 50m is roughly half a block; and a distance of 1m limits you to adjacent lots.
+                  </span>
+                </span>
+              </label>
               <input
-                className="border rounded p-1"
+                className="border rounded p-1 mt-1"
                 value={distance}
                 onChange={(e) => setDistance(e.currentTarget.value)}
               />
             </div>
             <div>
-              <p>Height multiple</p>
+              <label className="relative group">
+                Height multiple
+                <span className="inline-block cursor-pointer ml-1 text-blue-500">
+                  <span className="absolute hidden group-hover:block w-64 p-2 mt-1 bg-gray-700 text-white text-m rounded shadow-lg z-50">
+                    Multiplies the reference height. A multiple of 1.5 on a reference height of 40 feet would imply
+                    you could build up to 1.5 * 40 = 60 feet.
+                  </span>
+                </span>
+              </label>
               <input
-                className="border rounded p-1"
+                className="border rounded p-1 mt-1"
                 value={heightMultiple}
                 onChange={(e) => setHeightMultiple(e.currentTarget.value)}
               />
             </div>
             <div>
-              <p>Local height</p>
+              <label className="relative group">
+                Reference height
+                <span className="inline-block cursor-pointer ml-1 text-blue-500">
+                  <span className="absolute hidden group-hover:block w-64 p-2 mt-1 bg-gray-700 text-white text-m rounded shadow-lg z-50">
+                    This controls whether the upzoning is anchored to the maximum height of nearby buildings, the mean height, or the median height.
+                  </span>
+                </span>
+              </label>
               <select
-                className="border rounded p-1"
+                className="border rounded p-1 mt-1"
                 value={localHeight}
                 onChange={(e) => setLocalHeight(e.currentTarget.value)}
               >
@@ -329,9 +354,21 @@ export const MainApp = ({
               onDeselectAll={() => setSelectedNhoods([])}
             />
             {progressMeter}
+            
             <div>
-              <p>Nominal capacity: {nominalCapacity}</p>
-            </div>
+            <p className="relative group">
+            <span className="font-semibold">
+              Nominal capacity
+              <span className="inline-block cursor-pointer ml-1 text-blue-500">
+                <span className="absolute hidden group-hover:block w-64 p-2 mt-1 bg-gray-700 text-white text-m rounded shadow-lg z-50">
+                  This figure indicates how many extra 1,000-square-ft homes could physically fit into the newly created zoning capacity.
+                  A word of caution: these homes may not be economically feasible to build. They're just no longer illegal to build.
+                </span>
+              </span>
+            </span>
+            : {nominalCapacity}
+          </p>           
+          </div>
           </div>
           <div className="flex flex-col gap-4 border rounded p-4 shadow">
             <p className="text-lg">Visualization settings</p>
