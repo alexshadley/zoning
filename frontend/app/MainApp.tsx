@@ -25,9 +25,11 @@ const DefaultNhoods = [
 
 export const MainApp = ({
   parcels,
+  buildings,
   nhoodGeoms,
 }: {
   parcels: Parcels;
+  buildings: Buildings;
   nhoodGeoms: FeatureCollection<MultiPolygon, { nhood: string }>;
 }) => {
   const [urlParamsRead, setUrlParamsRead] = useState(false);
@@ -53,10 +55,8 @@ export const MainApp = ({
   const [rezoningProgress, setRezoningProgress] = useState(0.0);
 
   // viz settings
-  const [is3D, setIs3D] = useState(true);
+  const [is3D, setIs3D] = useState(false);
   const [showNhoodOverlay, setShowNhoodOverlay] = useState(true);
-  const [showExaggeratedHeights, setShowExaggeratedHeights] = useState(false);
-
   const [layout, setLayout] = useState<"mobile" | "desktop">("desktop");
 
   // Track window size
@@ -390,17 +390,6 @@ export const MainApp = ({
               />
               <p>Neighborhood overlay</p>
             </div>
-            <div className="flex gap-2">
-              <input
-                type="checkbox"
-                id="nhood-overlay"
-                checked={showExaggeratedHeights}
-                onChange={(e) =>
-                  setShowExaggeratedHeights(e.currentTarget.checked)
-                }
-              />
-              <p>Exaggerated building heights</p>
-            </div>
           </div>
         </div>
         <div className="basis-1/5 flex flex-col gap-4 overflow-y-auto">
@@ -413,11 +402,11 @@ export const MainApp = ({
         >
           <ParcelMap
             parcels={parcels}
+            buildings={buildings}
             nhoodGeoms={nhoodGeoms}
             rezonedParcels={rezonedParcels}
             is3D={is3D}
             showNhoodOverlay={showNhoodOverlay}
-            exaggeratedHeights={showExaggeratedHeights}
           />
         </div>
         {layout === "mobile" && (
