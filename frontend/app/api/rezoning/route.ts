@@ -70,6 +70,7 @@ export async function GET(request: NextRequest) {
       JOIN prc_hgt_bldg AS nearby
         ON ST_DWithin(p.geometry, nearby.geometry, $1)
         AND p.blklot != nearby.blklot
+      WHERE nearby.height is not null
       GROUP BY p.blklot
     ),
     parcel_calculations AS (
@@ -98,8 +99,9 @@ export async function GET(request: NextRequest) {
         pc.ground_floor * pc.n_floors_residential_squo
       WHEN pc.height > 85 AND pc.area_sq_ft < 45000 THEN 
         pc.ground_floor * 7 + 12000 * GREATEST(pc.n_floors_residential_squo - 7, 0)
-      ELSE 
+      WHEN pc.height > 85 THEN
         pc.ground_floor * 7 + ROUND(pc.area_sq_ft / 43560) * 12000 * GREATEST(pc.n_floors_residential_squo - 7, 0)
+      ELSE 0
     END * 0.8) / 1000 AS squo_capacity,
     (CASE
       WHEN pc.new_zoned_height <= 85 THEN 
@@ -108,8 +110,9 @@ export async function GET(request: NextRequest) {
         pc.ground_floor * pc.n_floors_residential
       WHEN pc.new_zoned_height > 85 AND pc.area_sq_ft < 45000 THEN 
         pc.ground_floor * 7 + 12000 * GREATEST(pc.n_floors_residential - 7, 0)
-      ELSE 
+      WHEN pc.new_zoned_height > 85 THEN 
         pc.ground_floor * 7 + ROUND(pc.area_sq_ft / 43560) * 12000 * GREATEST(pc.n_floors_residential - 7, 0)
+      ELSE 0
     END * 0.8) / 1000 AS new_capacity
   FROM parcel_calculations pc
   )
@@ -120,6 +123,7 @@ export async function GET(request: NextRequest) {
             WHEN t."Property Class Code Definition" = ANY($4) THEN 0
             WHEN t."Use Code" = 'GOVT' THEN 0
             WHEN c.new_capacity < c.squo_capacity THEN 0
+            WHEN c.new_capacity is NULL THEN 0
             ELSE LEAST(ROUND(c.new_capacity - c.squo_capacity), 1000)
           END AS added_capacity
           FROM capacity_calculations c
