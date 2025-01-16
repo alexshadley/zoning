@@ -293,7 +293,6 @@ export const MainApp = ({
               <label className="relative group">
                 Distance (m)
                 <span className="inline-block cursor-pointer ml-1 text-blue-500">
-                  ℹ️
                   <span className="absolute hidden group-hover:block w-64 p-2 mt-1 bg-gray-700 text-white text-m rounded shadow-lg z-50">
                     This value controls what counts as a "nearby" building. Measured in meters, a distance of 100m is roughly a block; 
                     a distance of 50m is roughly half a block; and a distance of 1m limits you to adjacent lots.
@@ -357,7 +356,7 @@ export const MainApp = ({
             
             <div>
             <p className="relative group">
-            <span className="font-semibold">
+            <span >
               Nominal capacity
               <span className="inline-block cursor-pointer ml-1 text-blue-500">
                 <span className="absolute hidden group-hover:block w-64 p-2 mt-1 bg-gray-700 text-white text-m rounded shadow-lg z-50">
