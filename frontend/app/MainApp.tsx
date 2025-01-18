@@ -157,32 +157,52 @@ export const MainApp = ({
           const body = await response.json();
 
           setRezonedParcels((prev) => {
-            const updated = { ...prev, ..._.keyBy(body.rezonedParcels, "blklot") };
+            const updated = {
+              ...prev,
+              ..._.keyBy(body.rezonedParcels, "blklot"),
+            };
             const updatedArray = Object.values(updated) as RezonedParcel[];
 
-          
             // find lots with biggest contribution to zoning cap
-            const capacityGtZero = updatedArray.filter((p) => p.added_capacity > 0).length;
-            const capacityGteOne = updatedArray.filter((p) => p.added_capacity >= 1).length;
-            const uniqueBlklotCount = new Set(updatedArray.map((p) => p.blklot)).size;
-            const totalAddedCapacity = updatedArray.reduce((sum, p) => sum + p.added_capacity, 0);
+            const capacityGtZero = updatedArray.filter(
+              (p) => p.added_capacity > 0
+            ).length;
+            const capacityGteOne = updatedArray.filter(
+              (p) => p.added_capacity >= 1
+            ).length;
+            const uniqueBlklotCount = new Set(updatedArray.map((p) => p.blklot))
+              .size;
+            const totalAddedCapacity = updatedArray.reduce(
+              (sum, p) => sum + p.added_capacity,
+              0
+            );
             const top10 = [...updatedArray]
-            .sort((a, b) => b.added_capacity - a.added_capacity)
-            .slice(0, 10);
-        
-          // Print blocklots + added units
-          console.log(
-            `<< [${nextNhood}] Top 10 blocklots by added_capacity:`,
-            top10.map((p) => ({
-              blklot: p.blklot,
-              added_capacity: p.added_capacity,
-            }))
-          );
-            console.log(`<< [${nextNhood}] updated rezonedParcels count: ${updatedArray.length}`);
-            console.log(`<< [${nextNhood}] # with added_capacity > 0: ${capacityGtZero}`);
-            console.log(`<< [${nextNhood}] # with added_capacity >= 1: ${capacityGteOne}`);
-            console.log(`<< [${nextNhood}] # of unique blocklots: ${uniqueBlklotCount}`);
-            console.log(`<< [${nextNhood}] sum of updated added_capacity: ${totalAddedCapacity}`);
+              .sort((a, b) => b.added_capacity - a.added_capacity)
+              .slice(0, 10);
+
+            // Print blocklots + added units
+            console.log(
+              `<< [${nextNhood}] Top 10 blocklots by added_capacity:`,
+              top10.map((p) => ({
+                blklot: p.blklot,
+                added_capacity: p.added_capacity,
+              }))
+            );
+            console.log(
+              `<< [${nextNhood}] updated rezonedParcels count: ${updatedArray.length}`
+            );
+            console.log(
+              `<< [${nextNhood}] # with added_capacity > 0: ${capacityGtZero}`
+            );
+            console.log(
+              `<< [${nextNhood}] # with added_capacity >= 1: ${capacityGteOne}`
+            );
+            console.log(
+              `<< [${nextNhood}] # of unique blocklots: ${uniqueBlklotCount}`
+            );
+            console.log(
+              `<< [${nextNhood}] sum of updated added_capacity: ${totalAddedCapacity}`
+            );
 
             return updated;
           });
@@ -258,9 +278,7 @@ export const MainApp = ({
             <div
               className="cursor-pointer text-xl"
               onClick={() => setShowHelpScreen(true)}
-            >
-              
-            </div>
+            ></div>
           )}
         </div>
         <div>
@@ -294,8 +312,10 @@ export const MainApp = ({
                 Distance (m)
                 <span className="inline-block cursor-pointer ml-1 text-blue-500">
                   <span className="absolute hidden group-hover:block w-64 p-2 mt-1 bg-gray-700 text-white text-m rounded shadow-lg z-50">
-                    This value controls what counts as a "nearby" building. Measured in meters, a distance of 100m is roughly a block; 
-                    a distance of 50m is roughly half a block; and a distance of 1m limits you to adjacent lots.
+                    This value controls what counts as a {'"nearby"'} building.
+                    Measured in meters, a distance of 100m is roughly a block; a
+                    distance of 50m is roughly half a block; and a distance of
+                    1m limits you to adjacent lots.
                   </span>
                 </span>
               </label>
@@ -310,8 +330,9 @@ export const MainApp = ({
                 Height multiple
                 <span className="inline-block cursor-pointer ml-1 text-blue-500">
                   <span className="absolute hidden group-hover:block w-64 p-2 mt-1 bg-gray-700 text-white text-m rounded shadow-lg z-50">
-                    Multiplies the reference height. A multiple of 1.5 on a reference height of 40 feet would imply
-                    you could build up to 1.5 * 40 = 60 feet.
+                    Multiplies the reference height. A multiple of 1.5 on a
+                    reference height of 40 feet would imply you could build up
+                    to 1.5 * 40 = 60 feet.
                   </span>
                 </span>
               </label>
@@ -326,7 +347,9 @@ export const MainApp = ({
                 Reference height
                 <span className="inline-block cursor-pointer ml-1 text-blue-500">
                   <span className="absolute hidden group-hover:block w-64 p-2 mt-1 bg-gray-700 text-white text-m rounded shadow-lg z-50">
-                    This controls whether the upzoning is anchored to the maximum height of nearby buildings, the mean height, or the median height.
+                    This controls whether the upzoning is anchored to the
+                    maximum height of nearby buildings, the mean height, or the
+                    median height.
                   </span>
                 </span>
               </label>
@@ -353,21 +376,24 @@ export const MainApp = ({
               onDeselectAll={() => setSelectedNhoods([])}
             />
             {progressMeter}
-            
+
             <div>
-            <p className="relative group">
-            <span >
-              Nominal capacity
-              <span className="inline-block cursor-pointer ml-1 text-blue-500">
-                <span className="absolute hidden group-hover:block w-64 p-2 mt-1 bg-gray-700 text-white text-m rounded shadow-lg z-50">
-                  This figure indicates how many extra 1,000-square-ft homes could physically fit into the newly created zoning capacity.
-                  A word of caution: these homes may not be economically feasible to build. They're just no longer illegal to build.
+              <p className="relative group">
+                <span>
+                  Nominal capacity
+                  <span className="inline-block cursor-pointer ml-1 text-blue-500">
+                    <span className="absolute hidden group-hover:block w-64 p-2 mt-1 bg-gray-700 text-white text-m rounded shadow-lg z-50">
+                      This figure indicates how many extra 1,000-square-ft homes
+                      could physically fit into the newly created zoning
+                      capacity. A word of caution: these homes may not be
+                      economically feasible to build. {"They're"} just no longer
+                      illegal to build.
+                    </span>
+                  </span>
                 </span>
-              </span>
-            </span>
-            : {nominalCapacity}
-          </p>           
-          </div>
+                : {nominalCapacity}
+              </p>
+            </div>
           </div>
           <div className="flex flex-col gap-4 border rounded p-4 shadow">
             <p className="text-lg">Visualization settings</p>
